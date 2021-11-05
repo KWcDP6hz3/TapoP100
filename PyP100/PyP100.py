@@ -300,3 +300,28 @@ class P100():
 			encodedName = data["result"]["nickname"]
 			name = b64decode(encodedName)
 			return name.decode("utf-8")
+		
+    	def getEnergy(self) -> dict:
+	        URL = f"http://{self.ipAddress}/app?token={self.token}"
+        	Payload = {
+	            "method": "get_energy_usage",
+	            "requestTimeMils": int(round(time.time() * 1000)),
+	        }
+
+	        headers = {
+	            "Cookie": self.cookie
+	        }
+
+	        EncryptedPayload = self.tpLinkCipher.encrypt(json.dumps(Payload))
+
+	        SecurePassthroughPayload = {
+	            "method":"securePassthrough",
+	            "params":{
+	                "request": EncryptedPayload
+	            }
+	        }
+
+	        r = requests.post(URL, json=SecurePassthroughPayload, headers=headers)
+	        decryptedResponse = self.tpLinkCipher.decrypt(r.json()["result"]["response"])
+
+	        return json.loads(decryptedResponse)
