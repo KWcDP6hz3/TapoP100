@@ -301,27 +301,27 @@ class P100():
 			name = b64decode(encodedName)
 			return name.decode("utf-8")
 		
-    	def getEnergy(self) -> dict:
-	        URL = f"http://{self.ipAddress}/app?token={self.token}"
-        	Payload = {
-	            "method": "get_energy_usage",
-	            "requestTimeMils": int(round(time.time() * 1000)),
-	        }
+	def getEnergy(self) -> dict:
+		URL = f"http://{self.ipAddress}/app?token={self.token}"
+		Payload = {
+			"method": "get_energy_usage",
+			"requestTimeMils": int(round(time.time() * 1000)),
+		}
 
-	        headers = {
-	            "Cookie": self.cookie
-	        }
+		headers = {
+			"Cookie": self.cookie
+		}
 
-	        EncryptedPayload = self.tpLinkCipher.encrypt(json.dumps(Payload))
+		EncryptedPayload = self.tpLinkCipher.encrypt(json.dumps(Payload))
 
-	        SecurePassthroughPayload = {
-	            "method":"securePassthrough",
-	            "params":{
-	                "request": EncryptedPayload
-	            }
-	        }
+		SecurePassthroughPayload = {
+			"method":"securePassthrough",
+			"params":{
+				"request": EncryptedPayload
+			}
+		}
 
-	        r = requests.post(URL, json=SecurePassthroughPayload, headers=headers)
-	        decryptedResponse = self.tpLinkCipher.decrypt(r.json()["result"]["response"])
+		r = requests.post(URL, json=SecurePassthroughPayload, headers=headers)
+		decryptedResponse = self.tpLinkCipher.decrypt(r.json()["result"]["response"])
 
-	        return json.loads(decryptedResponse)
+		return json.loads(decryptedResponse)
